@@ -125,7 +125,7 @@ class Synthesizer {
 
                 strongSelf.bufferIndex = (strongSelf.bufferIndex + 1) % strongSelf.audioBuffers.count
             }
-            print("play loop left")
+//            print("play loop left")
             semaphore.signal()
         }
 
@@ -144,7 +144,6 @@ class ViewController: UIViewController {
     private var synth: [Synthesizer] = []
 
     @IBAction func buttonPressed() {
-        print("foo bar")
 
         DispatchQueue.global().async {
 
