@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 
 
-class FMSynthesizer {
+class Synthesizer {
 
     // The maximum number of audio buffers in flight. Setting to two allows one
     // buffer to be played while the next is being written.
@@ -50,7 +50,8 @@ class FMSynthesizer {
 
     deinit {
         self.stop()
-        print("FM Synch is gone")
+        NotificationCenter.default.removeObserver(self)
+//        print("FM Synch is gone")
     }
 
     public init() {
@@ -85,7 +86,7 @@ class FMSynthesizer {
         let carrierVelocity = carrierFrequency * unitVelocity
         let modulatorVelocity = modulatorFrequency * unitVelocity
 
-        NotificationCenter.default.addObserver(self, selector: #selector(FMSynthesizer.audioEngineConfigurationChange(_:)),
+        NotificationCenter.default.addObserver(self, selector: #selector(Synthesizer.audioEngineConfigurationChange(_:)),
                                                name: NSNotification.Name.AVAudioEngineConfigurationChange, object: audioEngine)
 
         self.playerNode.play()
@@ -140,7 +141,7 @@ class FMSynthesizer {
 
 class ViewController: UIViewController {
 
-    private var synth: [FMSynthesizer] = []
+    private var synth: [Synthesizer] = []
 
     @IBAction func buttonPressed() {
         print("foo bar")
@@ -148,7 +149,7 @@ class ViewController: UIViewController {
         DispatchQueue.global().async {
 
             for _ in 1...15 {
-                let synth = FMSynthesizer()
+                let synth = Synthesizer()
                 synth.play( Float32(arc4random_uniform(1024)), modulatorFrequency: 679.0, modulatorAmplitude: 0.8)
                 usleep(200000)
                 self.synth.append(synth)
