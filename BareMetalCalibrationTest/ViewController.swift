@@ -9,7 +9,6 @@
 import UIKit
 import AVFoundation
 
-
 class Synthesizer {
 
     // The maximum number of audio buffers in flight. Setting to two allows one
@@ -51,7 +50,6 @@ class Synthesizer {
     deinit {
         self.stop()
         NotificationCenter.default.removeObserver(self)
-//        print("FM Synch is gone")
     }
 
     public init() {
@@ -64,11 +62,12 @@ class Synthesizer {
 
         // Use standard non-interleaved PCM audio.
         self.audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100.0, channels: 1)
-        self.audioQueue = DispatchQueue(label: "FMSynthesizerQueue", attributes: [])
+        self.audioQueue = DispatchQueue(label: "Synthesizer Queue", attributes: [])
 
         // Create a pool of audio buffers.
         if let audioFormat = self.audioFormat, let buffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: UInt32(kSamplesPerBuffer)) {
             self.audioBuffers = [AVAudioPCMBuffer](repeating: buffer, count: 1)
+
             // Attach and connect the player node.
             self.audioEngine.attach(playerNode)
             self.audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: audioFormat)
@@ -81,8 +80,13 @@ class Synthesizer {
         }
     }
 
-    func play(_ carrierFrequency: Float32, modulatorFrequency: Float32, modulatorAmplitude: Float32) {
-        let unitVelocity = Float32(2.0 * Double.pi / (audioFormat?.sampleRate)!)
+    func play(_ carrierFrequency: Float32, modulatorFrequency: Float32, modulatorAmplitude: Float32) -> Bool {
+
+        guard let sampleRate = self.audioFormat?.sampleRate else {
+            return false
+        }
+
+        let unitVelocity = Float32(2.0 * Double.pi / sampleRate)
         let carrierVelocity = carrierFrequency * unitVelocity
         let modulatorVelocity = modulatorFrequency * unitVelocity
 
@@ -131,6 +135,8 @@ class Synthesizer {
 
         self.playerNode.pan = ((Float32(arc4random_uniform(1024))-512.0)/512.0)
 //        self.playerNode.pan = -1.0
+
+        return true
     }
 
     @objc  func audioEngineConfigurationChange(_ notification: Notification) -> Void {
